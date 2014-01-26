@@ -7,27 +7,27 @@ require 'smart_colored'
 require 'rest-client'
 
 $LOAD_PATH << "."
-require_relative 'bro/state.rb'
-require_relative 'bro/bro_state.rb'
-require_relative 'bro/string_hacks.rb'
-require_relative 'bro/version.rb'
-include Bro
+require_relative 'dog/state.rb'
+require_relative 'dog/dog_state.rb'
+require_relative 'dog/string_hacks.rb'
+require_relative 'dog/version.rb'
+include dog
 
-URL = ENV["BROPAGES_URL"] || 'http://bropages.org'
-FILE = ENV["HOME"] + '/.bro'
+URL = ENV["dogPAGES_URL"] || 'http://dogpages.org'
+FILE = ENV["HOME"] + '/.dog'
 
-program :name, 'bro'
-program :version, Bro::VERSION
+program :name, 'dog'
+program :version, dog::VERSION
 program :description, "Highly readable supplement to man pages.\n\nShows simple, concise examples for commands."
 default_command :lookup
 
-state = Bro::BroState.new({:file => FILE})
+state = dog::dogState.new({:file => FILE})
 
 command :thanks do |c|
-  c.syntax = 'bro thanks [COMMAND]'
-  c.summary = 'Upvote an entry, bro'
-  c.description = 'Upvote a bro entry. If called without a COMMAND argument, it will upvote the last thing you looked up with bro'
-  c.example 'Upvote the bro entry for curl', 'bro thanks curl'
+  c.syntax = 'dog thanks [COMMAND]'
+  c.summary = 'Upvote an entry, dog'
+  c.description = 'Upvote a dog entry. If called without a COMMAND argument, it will upvote the last thing you looked up with dog'
+  c.example 'Upvote the dog entry for curl', 'dog thanks curl'
   c.action do |args, options|
     begin
       login_details = state.check_email
@@ -39,7 +39,7 @@ command :thanks do |c|
       cmd = state.read_state[:cmd]
 
       if cmd.nil?
-        say "\nYou must first look up a command before downvoting. For example: bro curl\n\n".sorry
+        say "\nYou must first look up a command before downvoting. For example: dog curl\n\n".sorry
         return
       end
 
@@ -58,7 +58,7 @@ command :thanks do |c|
           res = RestClient.get URL + "/thanks/#{id}", { params: login_details }
         rescue => e
           say e.message
-          say "There was a problem thanking the #{cmd} entry. This entry may not exist or bropages.org may be down".problem
+          say "There was a problem thanking the #{cmd} entry. This entry may not exist or dogpages.org may be down".problem
         else
           say "You just gave thanks to an entry for #{cmd}!".status
           say "You rock!".success
@@ -69,10 +69,10 @@ command :thanks do |c|
 end
 
 noblock = lambda { |c|
-  c.syntax = 'bro ...no [ID]'
-  c.summary = 'Downvote an entry, bro'
-  c.description = 'Downvote a bro entry for the last command you looked up. If called without ID, it will downvote the top entry of the last command you looked up.'
-  c.example 'Downvote the bro entry for curl', "bro curl\n\nbro ...no"
+  c.syntax = 'dog ...no [ID]'
+  c.summary = 'Downvote an entry, dog'
+  c.description = 'Downvote a dog entry for the last command you looked up. If called without ID, it will downvote the top entry of the last command you looked up.'
+  c.example 'Downvote the dog entry for curl', "dog curl\n\ndog ...no"
   c.action do |args, options|
     begin
       login_details = state.check_email
@@ -85,7 +85,7 @@ noblock = lambda { |c|
       cmd = state.read_state[:cmd]
 
       if cmd.nil?
-        say "\nYou must first look up a command before downvoting. For example: bro curl\n\n".sorry
+        say "\nYou must first look up a command before downvoting. For example: dog curl\n\n".sorry
         return
       end
 
@@ -103,7 +103,7 @@ noblock = lambda { |c|
         begin
           res = RestClient.get URL + "/no/#{id}", { params: login_details }
         rescue => e
-          say "There was a problem downvoting the #{cmd} entry. This entry may not exist or bropages.org may be down".problem
+          say "There was a problem downvoting the #{cmd} entry. This entry may not exist or dogpages.org may be down".problem
           say e
         else
           say "You just downvoted an entry for #{cmd}".status
@@ -118,15 +118,15 @@ command :"...no", &noblock
 command :no, &noblock
 
 command :add do |c|
-  c.syntax = 'bro add [COMMAND] [-m MESSAGE]'
-  c.summary = 'Add an entry, bro'
+  c.syntax = 'dog add [COMMAND] [-m MESSAGE]'
+  c.summary = 'Add an entry, dog'
   c.description = <<-QQQ.unindent
-  This adds an entry to the http://bropages.org database.
+  This adds an entry to the http://dogpages.org database.
   
-  Called without parameters will add an entry for the last thing you looked up with bro.
+  Called without parameters will add an entry for the last thing you looked up with dog.
   QQQ
-  c.example 'Launch your editor to add an entry for curl', 'bro add curl'
-  c.example 'Quickly add an entry for curl', 'bro add curl -m "curl http://google.com"'
+  c.example 'Launch your editor to add an entry for curl', 'dog add curl'
+  c.example 'Quickly add an entry for curl', 'dog add curl -m "curl http://google.com"'
   # TODO c.option '-m', 'An optional inline entry. This won\'t trigger a system editor to open'
   c.action do |args, options|
     begin
@@ -141,10 +141,10 @@ command :add do |c|
       cmd = state.get_arg_or_last_command args
 
       if cmd.nil?
-        say "\nYou must enter a command after #{"bro add".status}.\n\nFor example: #{"bro add".success} #{"curl".success.underline}\n\n"
+        say "\nYou must enter a command after #{"dog add".status}.\n\nFor example: #{"dog add".success} #{"curl".success.underline}\n\n"
       else
         prompt = <<-QQQ.unindent
-          #~ Bro entry for command '#{cmd}'
+          #~ dog entry for command '#{cmd}'
           #~ Provide a useful example for how to use '#{cmd}'
           #~ Comments starting with #~ are removed
           #~
@@ -164,12 +164,12 @@ command :add do |c|
               res = RestClient.post URL + '/', login_details.merge({ entry: { cmd: cmd, msg: entry}, format: 'json', multipart: true })
             rescue => e
               say e.message
-              file = "/tmp/#{cmd}.bro"
+              file = "/tmp/#{cmd}.dog"
 
               # increment file name as to not overwrite anything
               i = 1
               while File.exist?(file)
-                file = "/tmp/#{cmd}#{i}.bro"
+                file = "/tmp/#{cmd}#{i}.dog"
                 i += 1
               end
 
@@ -191,18 +191,18 @@ command :add do |c|
 end
 
 command :lookup do |c|
-  c.syntax = 'bro [COMMAND]'
-  c.summary = 'Lookup an entry, bro. Or just call bro [COMMAND]'
-  c.description = "This looks up entries in the http://bropages.org database."
-  c.example 'Look up the bro entries for curl', 'bro curl'
+  c.syntax = 'dog [COMMAND]'
+  c.summary = 'Lookup an entry, dog. Or just call dog [COMMAND]'
+  c.description = "This looks up entries in the http://dogpages.org database."
+  c.example 'Look up the dog entries for curl', 'dog curl'
   c.action do |args, options|
     if args.empty?
       say <<-QQQ.unindent
-      #{"Bro! Specify a command first!".colored.red}
+      #{"dog! Specify a command first!".colored.red}
       
-      \t* For example try #{"bro curl".colored.green}
+      \t* For example try #{"dog curl".colored.green}
       
-      \t* Use #{"bro help".colored.yellow} for more info
+      \t* Use #{"dog help".colored.yellow} for more info
       
       QQQ
     else
@@ -214,7 +214,7 @@ command :lookup do |c|
 
       state.reset_lookup_ids()
 
-      # write to ~/.bro file with last command
+      # write to ~/.dog file with last command
       state.write_state({ cmd: cmd_display })
 
       # connect to webservice for entry
@@ -225,11 +225,11 @@ command :lookup do |c|
         say <<-QQQ.unindent
         The #{cmd_display.colored.yellow} command isn't in our database.
         
-        \t* Typing #{"bro add".colored.green.underline} will let you add #{cmd_display.colored.yellow} to our database!
+        \t* Typing #{"dog add".colored.green.underline} will let you add #{cmd_display.colored.yellow} to our database!
 
-        \t* There's nothing to lose by typing #{"bro add".colored.red.underline}, it will just launch an editor with instructions.
+        \t* There's nothing to lose by typing #{"dog add".colored.red.underline}, it will just launch an editor with instructions.
         
-        \t* Need help? Visit #{"http://bropages.org/help".colored.underline}
+        \t* Need help? Visit #{"http://dogpages.org/help".colored.underline}
         
         QQQ
         error = true
@@ -241,7 +241,7 @@ command :lookup do |c|
         s = list.length == 1 ? 'y' : 'ies'
 
         say <<-QQQ.unindent
-        #{"#{list.length} entr#{s} for #{cmd_display}".status.underline} #{"-- submit your own example with \"bro add #{cmd_display}\"".colored.yellow}
+        #{"#{list.length} entr#{s} for #{cmd_display}".status.underline} #{"-- submit your own example with \"dog add #{cmd_display}\"".colored.yellow}
         
         QQQ
 
@@ -268,9 +268,9 @@ command :lookup do |c|
 
             say body + "\n\n"
 
-            upstr = "bro thanks"
+            upstr = "dog thanks"
             upstr += " #{i}" unless isDefault
-            downstr = "bro ...no"
+            downstr = "dog ...no"
             downstr += " #{i}" unless isDefault
 
             msg = "\t#{upstr.colored.green}\tto upvote (#{data['up']})\n\t#{downstr.colored.red}\tto downvote (#{data['down']})"

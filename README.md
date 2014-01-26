@@ -1,17 +1,17 @@
-THE BRO IDEA
+THE DOG IDEA
 =======
 
-`bro`
+`dog`
 
 It's more focused than `man` pages
 
 It provides a few simple examples for command line tools
 
-It's crowdsourced: all bro entries are editable by the community
+It's crowdsourced: all dog entries are editable by the community
 
 THE WEB
 -----------
 
-The server is at http://bropages.org
+The server still uses http://bropages.org for now. 
 
-The server provides a REST API for CRUD of bro entries and upvotes
+The server provides a REST API for CRUD of dog entries and upvotes

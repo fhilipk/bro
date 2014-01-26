@@ -1,5 +1,5 @@
-module Bro
-  class BroState < State
+module dog
+  class dogState < State
     def get_arg_or_last_command args
       cmd = args.join(" ")
       if args.empty?
@@ -24,7 +24,7 @@ module Bro
     end
 
     def prompt_email
-      say "Bropages.org requires an email address verification to do this".colored.yellow
+      say "dogpages.org requires an email address verification to do this".colored.yellow
       
       email = ""
 
@@ -46,7 +46,7 @@ module Bro
           begin
             is_invalid_code code, email
             invalid_code = false
-            say "Great! You're verified! FYI, your email and code are stored locally in ~/.bro".success
+            say "Great! You're verified! FYI, your email and code are stored locally in ~/.dog".success
             write_state({ email: email, code: code })
           rescue => e
             say "Woops, there was a problem verifying your email. Please try again".colored.yellow.on_red
